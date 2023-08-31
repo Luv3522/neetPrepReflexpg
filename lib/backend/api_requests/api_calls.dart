@@ -152,11 +152,13 @@ class GetPracticeQuestionsForATestGivenIdOffsetAndFirstNQuestionsCall {
     String? testId = 'VGVzdDoyMTIzNjI1',
     int? first = 400,
     int? offset = 0,
+    bool? bookmark,
+    String? authToken = '',
   }) {
     final body = '''
 {
-  "query": "query GetChunkParticularTest(\$id: ID!, \$first: Int!, \$offset: Int!) {\\n  test(id: \$id) {\\n    id\\n    numQuestions\\n    questions(orderBy: [SEQASC],first: \$first, offset:\$offset) {\\n      edges {\\n        node {\\n          id\\n          question\\n          options\\n          correctOptionIndex\\n         explanation\\n         explanationWithoutAudio\\n questionDetails(last: 1) {\\n edges { \\n node { \\n year \\n exam}}} \\n bookmarkQuestion {\\n            id\\n          }\\n          userAnswer {\\n            id\\n            userAnswer\\n          }\\n                topics(first: 1) {\\n            edges {\\n              node {\\n                id\\n                name\\n              }\\n              id\\n              cursor\\n            }\\n          }\\n          analytics {\\n            correctPercentage\\n            correctAnswerCount\\n            incorrectAnswerCount\\n            option1Percentage\\n            option2Percentage\\n            option3Percentage\\n            option4Percentage\\n          }\\n        }\\n      }\\n    }\\n  }\\n}",
-  "variables": "{\\"id\\":  \\"${testId}\\",\\n\\"first\\":${first},\\n  \\"offset\\": ${offset}\\n}",
+  "query": "query GetChunkParticularTest(\$id: ID!, \$first: Int!, \$offset: Int!, \$bookmark: Boolean) {\\n  test(id: \$id) {\\n    id\\n    numQuestions\\n    questions(orderBy: [SEQASC],first: \$first, offset:\$offset, bookmark:\$bookmark) {\\n      total\\n      edges {\\n        node {\\n          id\\n          question\\n          options\\n          correctOptionIndex\\n         explanation\\n         explanationWithoutAudio\\n questionDetails(last: 1) {\\n edges { \\n node { \\n year \\n exam}}} \\n bookmarkQuestion {\\n            id\\n          }\\n          userAnswer {\\n            id\\n            userAnswer\\n          }\\n                topics(first: 1) {\\n            edges {\\n              node {\\n                id\\n                name\\n              }\\n              id\\n              cursor\\n            }\\n          }\\n          analytics {\\n            correctPercentage\\n            correctAnswerCount\\n            incorrectAnswerCount\\n            option1Percentage\\n            option2Percentage\\n            option3Percentage\\n            option4Percentage\\n          }\\n        }\\n      }\\n    }\\n  }\\n}",
+  "variables": "{\\"id\\":  \\"${testId}\\",\\n\\"first\\":${first},\\n  \\"offset\\": ${offset}\\n, \\"bookmark\\":${bookmark}\\n}",
   "operationName": "GetChunkParticularTest"
 }''';
     return ApiManager.instance.makeApiCall(
@@ -166,6 +168,7 @@ class GetPracticeQuestionsForATestGivenIdOffsetAndFirstNQuestionsCall {
       callType: ApiCallType.POST,
       headers: {
         ...PracticeGroup.headers,
+        'Authorization': 'Bearer ${authToken}',
       },
       params: {},
       body: body,

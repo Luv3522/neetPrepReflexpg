@@ -4,6 +4,7 @@ import '/components/custom_html_view/custom_html_view_widget.dart';
 import '/components/report_aproblem/report_aproblem_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_toggle_icon.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/custom_code/actions/index.dart' as actions;
 import '/custom_code/widgets/index.dart' as custom_widgets;
@@ -111,7 +112,7 @@ class _PracticeQuetionsPageWidgetState
                       children: [
                         Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(
-                              0.0, 0.0, 20.0, 0.0),
+                              0.0, 0.0, 10.0, 0.0),
                           child: InkWell(
                             splashColor: Colors.transparent,
                             focusColor: Colors.transparent,
@@ -136,7 +137,9 @@ class _PracticeQuetionsPageWidgetState
                           ),
                         ),
                         Text(
-                          FFAppState().topicNameForEachPage,
+                          FFAppState()
+                              .topicNameForEachPage
+                              .maybeHandleOverflow(maxChars: 25),
                           style: FlutterFlowTheme.of(context)
                               .headlineMedium
                               .override(
@@ -151,51 +154,95 @@ class _PracticeQuetionsPageWidgetState
                         ),
                       ],
                     ),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () async {
-                        await showModalBottomSheet(
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          barrierColor: Color(0x00000000),
-                          enableDrag: false,
-                          context: context,
-                          builder: (context) {
-                            return GestureDetector(
-                              onTap: () => FocusScope.of(context)
-                                  .requestFocus(_model.unfocusNode),
-                              child: Padding(
-                                padding: MediaQuery.viewInsetsOf(context),
-                                child: Container(
-                                  height:
-                                      MediaQuery.sizeOf(context).height * 1.0,
-                                  child: BubbleQuestionsWidget(
-                                    testId: widget.testId,
-                                    numberOfQuestions: widget.numberOfQuestions,
-                                  ),
-                                ),
-                              ),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ToggleIcon(
+                          onPressed: () async {
+                            setState(() => _model.filtered = !_model.filtered);
+                            await showDialog(
+                              context: context,
+                              builder: (alertDialogContext) {
+                                return AlertDialog(
+                                  title: Text('Bookmarked Questions'),
+                                  content: Text(
+                                      'You will only see bookmarked qusetions. To see all questions, click on the filter again'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(alertDialogContext),
+                                      child: Text('Ok'),
+                                    ),
+                                  ],
+                                );
+                              },
                             );
+                            setState(() {
+                              _model.filtered = true;
+                            });
                           },
-                        ).then((value) =>
-                            setState(() => _model.selectedPageNumber = value));
+                          value: _model.filtered,
+                          onIcon: Icon(
+                            Icons.filter_alt,
+                            color: FlutterFlowTheme.of(context).primary,
+                            size: 25.0,
+                          ),
+                          offIcon: Icon(
+                            Icons.filter_alt,
+                            color: FlutterFlowTheme.of(context).secondaryText,
+                            size: 25.0,
+                          ),
+                        ),
+                        InkWell(
+                          splashColor: Colors.transparent,
+                          focusColor: Colors.transparent,
+                          hoverColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          onTap: () async {
+                            await showModalBottomSheet(
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              barrierColor: Color(0x00000000),
+                              enableDrag: false,
+                              context: context,
+                              builder: (context) {
+                                return GestureDetector(
+                                  onTap: () => FocusScope.of(context)
+                                      .requestFocus(_model.unfocusNode),
+                                  child: Padding(
+                                    padding: MediaQuery.viewInsetsOf(context),
+                                    child: Container(
+                                      height:
+                                          MediaQuery.sizeOf(context).height *
+                                              1.0,
+                                      child: BubbleQuestionsWidget(
+                                        testId: widget.testId,
+                                        numberOfQuestions:
+                                            widget.numberOfQuestions,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ).then((value) => setState(
+                                () => _model.selectedPageNumber = value));
 
-                        await _model.pageViewController?.animateToPage(
-                          _model.selectedPageNumber!,
-                          duration: Duration(milliseconds: 500),
-                          curve: Curves.ease,
-                        );
+                            await _model.pageViewController?.animateToPage(
+                              _model.selectedPageNumber!,
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.ease,
+                            );
 
-                        setState(() {});
-                      },
-                      child: Icon(
-                        Icons.grid_view,
-                        color: Color(0xFF00629F),
-                        size: 29.0,
-                      ),
+                            setState(() {});
+                          },
+                          child: Icon(
+                            Icons.grid_view,
+                            color: Color(0xFF00629F),
+                            size: 29.0,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -285,6 +332,11 @@ class _PracticeQuetionsPageWidgetState
                                                                 .getOffsetInt(
                                                                     quetionListIndex),
                                                             first: 10,
+                                                            bookmark:
+                                                                _model.filtered,
+                                                            authToken:
+                                                                FFAppState()
+                                                                    .subjectToken,
                                                           ),
                                                         ),
                                                         builder: (context,
@@ -752,8 +804,7 @@ class _PracticeQuetionsPageWidgetState
                                                                                       columnGetPracticeQuestionsForATestGivenIdOffsetAndFirstNQuestionsResponse.jsonBody,
                                                                                     ) as List)
                                                                                         .map<String>((s) => s.toString())
-                                                                                        .toList()[functions.getOffsetListQueIndex(quetionListIndex)]
-                                                                                        .toString()))
+                                                                                        .toList()[functions.getOffsetListQueIndex(quetionListIndex)]))
                                                                                       wrapWithModel(
                                                                                         model: _model.customHtmlViewModels2.getModel(
                                                                                           'QuestionListId:${getJsonField(
@@ -781,8 +832,7 @@ class _PracticeQuetionsPageWidgetState
                                                                                       columnGetPracticeQuestionsForATestGivenIdOffsetAndFirstNQuestionsResponse.jsonBody,
                                                                                     ) as List)
                                                                                         .map<String>((s) => s.toString())
-                                                                                        .toList()[functions.getOffsetListQueIndex(quetionListIndex)]
-                                                                                        .toString()))
+                                                                                        .toList()[functions.getOffsetListQueIndex(quetionListIndex)]))
                                                                                       Container(
                                                                                         width: MediaQuery.sizeOf(context).width * 0.8,
                                                                                         height: 380.0,
@@ -791,7 +841,7 @@ class _PracticeQuetionsPageWidgetState
                                                                                           height: 380.0,
                                                                                           src: '<style>iframe { max-width: 640px !important;  max-height: 360px !important; position: static !important; } .youtube-embed-wrapper { max-width: 640px !important;  max-height: 360px !important; padding-bottom: 0px !important; position: static !important; height: 100% !important; } body{font-size: 16px;}</style>${functions.converHtmlIntoString((PracticeGroup.getPracticeQuestionsForATestGivenIdOffsetAndFirstNQuestionsCall.testHtmlFullExplanationsArr(
                                                                                             columnGetPracticeQuestionsForATestGivenIdOffsetAndFirstNQuestionsResponse.jsonBody,
-                                                                                          ) as List).map<String>((s) => s.toString()).toList()[functions.getOffsetListQueIndex(quetionListIndex)].toString())}',
+                                                                                          ) as List).map<String>((s) => s.toString()).toList()[functions.getOffsetListQueIndex(quetionListIndex)])}',
                                                                                         ),
                                                                                       ),
                                                                                   ],

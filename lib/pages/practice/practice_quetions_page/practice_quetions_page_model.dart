@@ -4,6 +4,7 @@ import '/components/custom_html_view/custom_html_view_widget.dart';
 import '/components/report_aproblem/report_aproblem_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_toggle_icon.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/custom_code/actions/index.dart' as actions;
 import '/custom_code/widgets/index.dart' as custom_widgets;
@@ -21,6 +22,8 @@ class PracticeQuetionsPageModel extends FlutterFlowModel {
   int chkAnswer = 0;
 
   bool showConfetti = false;
+
+  bool filtered = false;
 
   ///  State fields for stateful widgets in this page.
 
